@@ -44,10 +44,14 @@ class ExchangeMailBox {
         
     }
     
+    /**
+     * 
+     * @return array
+     */
     function getAllMailsFromMailBox() {
         $mailArray = array();
         for ($index = 0; $index < imap_num_msg($this->imapStream); $index++) {
-            $mailArray[];
+            $mailArray[] = imap_body($this->imapStream, $index);
         }
         return $mailArray;
     }
