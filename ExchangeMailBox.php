@@ -45,7 +45,11 @@ class ExchangeMailBox {
     }
     
     function getAllMailsFromMailBox() {
-        
+        $mailArray = array();
+        for ($index = 0; $index < imap_num_msg($this->imapStream); $index++) {
+            $mailArray[];
+        }
+        return $mailArray;
     }
     
     function getMailBodyTextFromMail($mail) {
