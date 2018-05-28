@@ -39,48 +39,40 @@ class ExchangeMailBox {
     function setSearchBehavior($searchBehavior) {
         $this->searchBehavior = $searchBehavior;
     }
-    
-    function getNewestMailFromMailBox() {
-        
-    }
-    
+
     /**
      * 
      * @return array
      */
-    function getAllMailsFromMailBox() {
-        $mailArray = array();
+    function getAllMailBodysFromMailBox() {
+        $mailBodyArray = array();
         for ($index = 0; $index < imap_num_msg($this->imapStream); $index++) {
-            $mailArray[] = imap_body($this->imapStream, $index);
+            $mailBodyArray[] = imap_body($this->imapStream, $index);
         }
-        return $mailArray;
+        return $mailBodyArray;
     }
-    
-    function getMailBodyTextFromMail($mail) {
-        return $bodyText;
-    }
-    
+
     /**
      * 
      * @param string $pattern
      * @return array
      */
-    function getAllSearchStringsFromAllMailBodyText(string $pattern) {
+    function getAllSearchStringsFromAllMailBodyText($pattern) {
         $searchResult = array();
-        foreach ($this->getAllMailsFromMailBox() as $mail) {
+        foreach ($this->getAllMailBodysFromMailBox() as $mailBody) {
             $searchResult[] = $this->getSearchString($pattern
-                    , $this->getMailBodyTextFromMail($mail));
+                , $mailBody);
         }
         return $searchResult;
     }
-    
+
     /**
      * 
      * @param string $pattern
      * @param string $subject
      * @return string the string to search
      */
-    function getSearchString(string $pattern, string $subject) {
+    function getSearchString($pattern, $subject) {
         return $this->searchBehavior->searchStrategy($pattern, $subject);
     }
 
