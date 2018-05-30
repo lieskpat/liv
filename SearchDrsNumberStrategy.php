@@ -19,7 +19,7 @@ class SearchDrsNumberStrategy implements SearchBehavior{
      * @param string $subject
      * @return string
      */
-    public function searchStrategy(string $pattern, string $subject) {
+    public function searchStrategy($pattern, $subject) {
         
         return $drsNumber;
         

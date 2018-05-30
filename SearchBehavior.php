@@ -12,6 +12,6 @@
  */
 interface SearchBehavior {
     
-    public function searchStrategy(string $pattern, string $subject);
+    public function searchStrategy($pattern, $subject);
     
 }

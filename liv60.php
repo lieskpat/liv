@@ -6,6 +6,8 @@
  * and open the template in the editor.
  */
 
+
+
 $exchangeConnection = new ExchangeConnection('{exchange3.lt.lsa-net.de:993/imap/ssl/novalidate-cert}INBOX'
     , 'lt\liv60'
     , 'liv60');
