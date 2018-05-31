@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -11,9 +11,9 @@
  * @author lies
  */
 interface Connection {
-    
+
     public function openConnection();
-    
+
     public function closeConnection();
 }
 
@@ -66,8 +66,8 @@ class ExchangeConnection implements Connection {
     public function openConnection() {
         //hier muss exception Abfrage rein
         $this->imapStream = imap_open($this->getConnectionAddress()
-                , $this->getUserName()
-                , $this->getPassword());
+            , $this->getUserName()
+            , $this->getPassword());
     }
 
     public function closeConnection() {
@@ -121,27 +121,48 @@ class ExchangeMailBox {
         }
         return $mailBodyArray;
     }
-    
-    function printAllMailBodysFromMailBox() {
-        foreach ($this->getAllMailBodysFromMailBox() as $mailBody) {
+
+    /**
+     * 
+     * @param string $fromDate
+     */
+    function getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) {
+        $mailBodyArray = array();
+        for ($index = 1; $index <= $this->getAmountOfAllMessagesFromMailBox(); $index++) {
+            $headerObject = imap_header($this->imapStream, $index);
+            if ($headerObject && (strtotime($headerObject->date) > $fromDate)) {
+                $mailBodyArray[] = imap_body($this->imapStream, $index);
+            }
+        }
+        return $mailBodyArray;
+    }
+
+    /**
+     * 
+     * @param timestamp $fromDate
+     */
+    function printAllMailBodysFromMailBox($fromDate) {
+        foreach ($this->getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) as $mailBody) {
             echo $mailBody;
         }
     }
-    
-    function getNumberOfAllMessagesFromMailBox() {
+
+    function getAmountOfAllMessagesFromMailBox() {
         return imap_num_msg($this->imapStream);
     }
 
     /**
      * 
      * @param string $pattern
+     * @param string $fromDate
      * @return array
      */
-    function getAllSearchStringsFromAllMailBodyText($pattern) {
+    function getAllSearchStringsFromAllMailBodyText($pattern, $fromDate) {
         $searchResult = array();
-        foreach ($this->getAllMailBodysFromMailBox() as $mailBody) {
-            $searchResult[] = $this->getSearchString($pattern
-                , $mailBody);
+        foreach ($this->getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) as $mailBody) {
+            if ($this->getSearchString($pattern, $mailBody) != "") {
+                $searchResult[] = $this->getSearchString($pattern, $mailBody);
+            }
         }
         return $searchResult;
     }
@@ -163,9 +184,8 @@ class ExchangeMailBox {
  * @author lies
  */
 interface SearchBehavior {
-    
+
     public function searchStrategy($pattern, $subject);
-    
 }
 
 /**
@@ -173,8 +193,8 @@ interface SearchBehavior {
  *
  * @author lies
  */
-class SearchDrsNumberStrategy implements SearchBehavior{
-    
+class SearchDrsNumberStrategy implements SearchBehavior {
+
     /**
      * 
      * @param string $pattern to search a DRS-Number
@@ -182,9 +202,9 @@ class SearchDrsNumberStrategy implements SearchBehavior{
      * @return string
      */
     public function searchStrategy($pattern, $subject) {
-        $drsNumber = '120/34';
-        return $drsNumber;
-        
+        if (preg_match($pattern, $subject, $matches)) {
+            return $matches[0];
+        }
     }
 
 }
@@ -193,11 +213,14 @@ $exchangeConnection = new ExchangeConnection('{exchange3.lt.lsa-net.de:993/imap/
     , 'lt\liv60'
     , 'liv60');
 $exchangeMailBox = new ExchangeMailBox($exchangeConnection, new SearchDrsNumberStrategy());
-//$drsNumberArray = $exchangeMailBox->getAllSearchStringsFromAllMailBodyText('');
-$exchangeMailBox->printAllMailBodysFromMailBox();
-echo $exchangeMailBox->getNumberOfAllMessagesFromMailBox();
-//foreach ($drsNumberArray as $drsNumber) {
-//    echo '$drsNumber';
-//}
+//regEx 111/18(neu), 71/18(neu), 600/17(neu), 77/18(B), 23/18(B), 
+$drsNumberArray = $exchangeMailBox->getAllSearchStringsFromAllMailBodyText(
+    '/[1-9]{1,4}\/[1-9]{1,3}\(?[a-zA-Z]*\)?/'
+    , 1514761200);
+//$exchangeMailBox->printAllMailBodysFromMailBox(1514761200);
+echo $exchangeMailBox->getAmountOfAllMessagesFromMailBox() . " Nachrichten im Posteingang" . "\n";
+foreach ($drsNumberArray as $drsNumber) {
+    echo $drsNumber . "\n";
+}
 $exchangeConnection->closeConnection();
 
