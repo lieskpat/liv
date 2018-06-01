@@ -54,14 +54,45 @@ class ExchangeMailBox {
 
     /**
      * 
+     * @param string $fromDate
+     */
+    function getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) {
+        $mailBodyArray = array();
+        for ($index = 1; $index <= $this->getAmountOfAllMessagesFromMailBox(); $index++) {
+            $headerObject = imap_header($this->imapStream, $index);
+            if ($headerObject && (strtotime($headerObject->date) > $fromDate)) {
+                $mailBodyArray[] = imap_body($this->imapStream, $index);
+            }
+        }
+        return $mailBodyArray;
+    }
+
+    /**
+     * 
+     * @param timestamp $fromDate
+     */
+    function printAllMailBodysFromMailBox($fromDate) {
+        foreach ($this->getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) as $mailBody) {
+            echo $mailBody;
+        }
+    }
+
+    function getAmountOfAllMessagesFromMailBox() {
+        return imap_num_msg($this->imapStream);
+    }
+
+    /**
+     * 
      * @param string $pattern
+     * @param string $fromDate
      * @return array
      */
-    function getAllSearchStringsFromAllMailBodyText($pattern) {
+    function getAllSearchStringsFromAllMailBodyText($pattern, $fromDate) {
         $searchResult = array();
-        foreach ($this->getAllMailBodysFromMailBox() as $mailBody) {
-            $searchResult[] = $this->getSearchString($pattern
-                , $mailBody);
+        foreach ($this->getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) as $mailBody) {
+            if ($this->getSearchString($pattern, $mailBody) != "") {
+                $searchResult[] = $this->getSearchString($pattern, $mailBody);
+            }
         }
         return $searchResult;
     }

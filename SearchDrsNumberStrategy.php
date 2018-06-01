@@ -6,13 +6,15 @@
  * and open the template in the editor.
  */
 
+require_once 'SearchBehavior.php';
+
 /**
  * Description of SearchDrsNumber
  *
  * @author lies
  */
-class SearchDrsNumberStrategy implements SearchBehavior{
-    
+class SearchDrsNumberStrategy implements SearchBehavior {
+
     /**
      * 
      * @param string $pattern to search a DRS-Number
@@ -20,9 +22,9 @@ class SearchDrsNumberStrategy implements SearchBehavior{
      * @return string
      */
     public function searchStrategy($pattern, $subject) {
-        
-        return $drsNumber;
-        
+        if (preg_match($pattern, $subject, $matches)) {
+            return $matches[0];
+        }
     }
 
 }

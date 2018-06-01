@@ -6,6 +6,8 @@
  * and open the template in the editor.
  */
 
+require_once 'Connection.php';
+
 /**
  * Description of ExchangeConnection
  *
@@ -55,8 +57,8 @@ class ExchangeConnection implements Connection {
     public function openConnection() {
         //hier muss exception Abfrage rein
         $this->imapStream = imap_open($this->getConnectionAddress()
-                , $this->getUserName()
-                , $this->getPassword());
+            , $this->getUserName()
+            , $this->getPassword());
     }
 
     public function closeConnection() {
