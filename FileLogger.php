@@ -6,12 +6,15 @@
  * and open the template in the editor.
  */
 
+require_once 'LoggerInterface.php';
+require_once 'ObserverInterface.php';
+
 /**
  * Description of Logger
  *
  * @author Lieske
  */
-class Logger {
+class FileLogger implements LoggerInterface, ObserverInterface{
     
     private $fileOperation;
     
@@ -35,9 +38,25 @@ class Logger {
      * 
      * @param String $string
      */
-    function writeInLogFile($string) {
-        $this->fileOperation->write($string);
+    function write($string) {
+        $this->writeLine($string);
         return $this;
+    }
+    
+    /**
+     * 
+     * @param type $string
+     */
+    function writeLine($string) {
+        $this->fileOperation->write($string) . "\n";
+    }
+
+    /**
+     * 
+     * @param type $observable
+     */
+    public function update($observable) {
+        $this->write($observable->getData());
     }
 
 }

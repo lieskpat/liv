@@ -13,14 +13,12 @@ require_once 'Connection.php';
  *
  * @author Lieske
  */
-class FileConnection implements Connection{
-    
+class FileConnection implements Connection {
+
     private $fileStream;
-    
     private $fileNameToOpenStream;
-    
     private $fileAccessMode;
-    
+
     /**
      * 
      * @param type $fileStream
@@ -58,16 +56,23 @@ class FileConnection implements Connection{
 
     /**
      * 
-     */    
+     */
     public function openConnection() {
-        $this->fileStream = fopen($this->fileNameToOpenStream, $this->fileAccessMode);
+        try {
+            $this->fileStream = fopen($this->fileNameToOpenStream
+                    , $this->fileAccessMode);
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+        }
     }
-    
+
     /**
      * close the open file stream
      */
     public function closeConnection() {
-        return fclose($this->fileStream);
+        if (is_null($this->fileStream)) {
+            return fclose($this->fileStream);
+        }
     }
 
 }

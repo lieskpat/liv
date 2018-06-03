@@ -6,17 +6,25 @@
  * and open the template in the editor.
  */
 
+require_once 'AbstractObservable.php';
+require_once 'ExchangeEmail.php';
+
 /**
  * Description of ExchangeMailBox
  *
  * @author lies
  */
-class ExchangeMailBox {
+class ExchangeMailBox extends AbstractObservable {
 
     private $exchangeConnection;
     private $searchBehavior;
     private $imapStream;
 
+    /**
+     * 
+     * @param type $exchangeConnection
+     * @param type $searchBehavior
+     */
     function __construct($exchangeConnection, $searchBehavior) {
         $this->exchangeConnection = $exchangeConnection;
         $this->searchBehavior = $searchBehavior;
@@ -24,20 +32,46 @@ class ExchangeMailBox {
         $this->imapStream = $this->exchangeConnection->getImapStream();
     }
 
+    /**
+     * 
+     * @return type
+     */
     function getExchangeConnection() {
         return $this->exchangeConnection;
     }
 
+    /**
+     * 
+     * @return type
+     */
     function getSearchBehavior() {
         return $this->searchBehavior;
     }
 
+    /**
+     * 
+     * @param type $exchangeConnection
+     */
     function setExchangeConnection($exchangeConnection) {
         $this->exchangeConnection = $exchangeConnection;
     }
 
+    /**
+     * 
+     * @param type $searchBehavior
+     */
     function setSearchBehavior($searchBehavior) {
         $this->searchBehavior = $searchBehavior;
+    }
+
+    /**
+     * 
+     * @param type $imapStream
+     * @param type $messageNumber
+     * @return imap_header object
+     */
+    function getMailHeaderObjectFromMail($imapStream, $messageNumber) {
+        return imap_header($imapStream, $messageNumber);
     }
 
     /**
@@ -57,14 +91,20 @@ class ExchangeMailBox {
      * @param string $fromDate
      */
     function getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) {
-        $mailBodyArray = array();
-        for ($index = 1; $index <= $this->getAmountOfAllMessagesFromMailBox(); $index++) {
-            $headerObject = imap_header($this->imapStream, $index);
+        $exchangeEmailArray = array();
+        for ($index = 1; $index <= $this->getAmountOfAllMessagesFromMailBox()
+        ; $index++) {
+            $headerObject = $this->getMailHeaderObjectFromMail(
+                    $this->imapStream, $index);
             if ($headerObject && (strtotime($headerObject->date) > $fromDate)) {
-                $mailBodyArray[] = imap_body($this->imapStream, $index);
+                //$mailBodyArray[] = imap_body($this->imapStream, $index);
+                $exchangeEmailArray[] = new ExchangeEmail(
+                        imap_body($this->imapStream, $index)
+                        , $headerObject->senderaddress
+                        , $headerObject->udate);
             }
         }
-        return $mailBodyArray;
+        return $exchangeEmailArray;
     }
 
     /**
@@ -72,11 +112,15 @@ class ExchangeMailBox {
      * @param timestamp $fromDate
      */
     function printAllMailBodysFromMailBox($fromDate) {
-        foreach ($this->getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) as $mailBody) {
-            echo $mailBody;
+        foreach ($this->getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) as $exchangeEmail) {
+            echo $exchangeEmail->getMailBody();
         }
     }
 
+    /**
+     * 
+     * @return type
+     */
     function getAmountOfAllMessagesFromMailBox() {
         return imap_num_msg($this->imapStream);
     }
@@ -89,9 +133,18 @@ class ExchangeMailBox {
      */
     function getAllSearchStringsFromAllMailBodyText($pattern, $fromDate) {
         $searchResult = array();
-        foreach ($this->getAllMailBodysFromMailBoxFromMailSendingDate($fromDate) as $mailBody) {
-            if ($this->getSearchString($pattern, $mailBody) != "") {
-                $searchResult[] = $this->getSearchString($pattern, $mailBody);
+        foreach ($this->getAllMailBodysFromMailBoxFromMailSendingDate($fromDate)
+        as $exchangeEmail) {
+            if ($this->getSearchString($pattern
+                            , $exchangeEmail->getMailBody()) != "") {
+                $searchResult = $this->getSearchString(
+                        $pattern, $exchangeEmail->getMailBody());
+                $searchResult[] = $searchResult;
+                //notify the Observer for logging
+                $this->setData($exchangeEmail->getSenderAddress()
+                        . ' ' . date("d.m.Y - H:i"
+                                , $exchangeEmail->getSendingDate()) . ' '
+                        . $searchResult);
             }
         }
         return $searchResult;

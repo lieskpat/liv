@@ -7,62 +7,121 @@
  */
 
 require_once 'Connection.php';
+require_once 'AbstractObservable.php';
 
 /**
  * Description of ExchangeConnection
  *
  * @author lies
  */
-class ExchangeConnection implements Connection {
+class ExchangeConnection extends AbstractObservable implements Connection {
 
     private $imapStream;
     private $connectionAddress;
     private $userName;
     private $password;
 
+    /**
+     * 
+     * @param type $connectionAddress
+     * @param type $userName
+     * @param type $password
+     */
     function __construct($connectionAddress, $userName, $password) {
         $this->connectionAddress = $connectionAddress;
         $this->userName = $userName;
         $this->password = $password;
     }
 
+    /**
+     * 
+     * @return type
+     */
     function getImapStream() {
         return $this->imapStream;
     }
 
+    /**
+     * 
+     * @return type
+     */
     function getConnectionAddress() {
         return $this->connectionAddress;
     }
 
+    /**
+     * 
+     * @return type
+     */
     function getUserName() {
         return $this->userName;
     }
 
+    /**
+     * 
+     * @return type
+     */
     function getPassword() {
         return $this->password;
     }
 
+    /**
+     * 
+     * @param type $connectionAddress
+     */
     function setConnectionAddress($connectionAddress) {
         $this->connectionAddress = $connectionAddress;
     }
 
+    /**
+     * 
+     * @param type $userName
+     */
     function setUserName($userName) {
         $this->userName = $userName;
     }
 
+    /**
+     * 
+     * @param type $password
+     */
     function setPassword($password) {
         $this->password = $password;
     }
 
+    /**
+     * 
+     */
     public function openConnection() {
-        //hier muss exception Abfrage rein
-        $this->imapStream = imap_open($this->getConnectionAddress()
-            , $this->getUserName()
-            , $this->getPassword());
+        try {
+            $this->imapStream = imap_open($this->getConnectionAddress()
+                    , $this->getUserName()
+                    , $this->getPassword());
+            //über Observer in Logger schreiben 
+            //Datum Uhrzeit Connection zum Postfach
+            $this->setData('Connection successful' .
+                    date("d.m.Y - H:i", time()));
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            //über Observer in Logger schreiben
+            //Datum Uhrzeit Connection zum Postfach fehlgeschlagen
+            $this->setData('Connection not successful' . ' ' .
+                    date("d.m.Y - H:i", time()) . ' ' .
+                    $exc->getTraceString());
+        }
     }
 
+    /**
+     * 
+     */
     public function closeConnection() {
-        imap_close($this->getImapStream());
+        if (!is_null($this->imapStream)) {
+            imap_close($this->getImapStream());
+            //über Observer in Logger schreiben
+            //Connection zum Postfach geschlossen
+            $this->setData('Connection closed' . ' ' .
+                    date("d.m.Y - H:i", time()));
+        }
     }
 
 }
