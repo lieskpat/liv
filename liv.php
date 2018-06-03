@@ -12,7 +12,7 @@ $logger = new FileLogger(new FileOperation($fileConnection));
 $exchangeConnection = new ExchangeConnection(
         '{exchange3.lt.lsa-net.de:993/imap/ssl/novalidate-cert}INBOX'
         , 'lt\liv60'
-        , 'liv60');
+        , 'password');
 $exchangeConnection->addObserver($logger);
 $exchangeMailBox = new ExchangeMailBox(
         $exchangeConnection, new SearchDrsNumberStrategy());
