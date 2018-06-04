@@ -99,14 +99,14 @@ class ExchangeConnection extends AbstractObservable implements Connection {
                     , $this->getPassword());
             //über Observer in Logger schreiben 
             //Datum Uhrzeit Connection zum Postfach
-            $this->setData('Connection successful' .
-                    date("d.m.Y - H:i", time()));
+            $this->setData('Connection successful ' .
+                    date("d.m.Y - H:i:s", time()));
         } catch (Exception $exc) {
             echo $exc->getTraceAsString();
             //über Observer in Logger schreiben
             //Datum Uhrzeit Connection zum Postfach fehlgeschlagen
             $this->setData('Connection not successful' . ' ' .
-                    date("d.m.Y - H:i", time()) . ' ' .
+                    date("d.m.Y - H:i:s", time()) . ' ' .
                     $exc->getTraceString());
         }
     }

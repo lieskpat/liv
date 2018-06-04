@@ -100,7 +100,7 @@ class ExchangeMailBox extends AbstractObservable {
                 //$mailBodyArray[] = imap_body($this->imapStream, $index);
                 $exchangeEmailArray[] = new ExchangeEmail(
                         imap_body($this->imapStream, $index)
-                        , $headerObject->senderaddress
+                        , $headerObject->fromaddress
                         , $headerObject->udate);
             }
         }
@@ -137,14 +137,14 @@ class ExchangeMailBox extends AbstractObservable {
         as $exchangeEmail) {
             if ($this->getSearchString($pattern
                             , $exchangeEmail->getMailBody()) != "") {
-                $searchResult = $this->getSearchString(
+                $drsNumberResult = $this->getSearchString(
                         $pattern, $exchangeEmail->getMailBody());
-                $searchResult[] = $searchResult;
+                $searchResult[] = $drsNumberResult;
                 //notify the Observer for logging
                 $this->setData($exchangeEmail->getSenderAddress()
-                        . ' ' . date("d.m.Y - H:i"
+                        . ' ' . date("d.m.Y - H:i:s"
                                 , $exchangeEmail->getSendingDate()) . ' '
-                        . $searchResult);
+                        . $drsNumberResult);
             }
         }
         return $searchResult;

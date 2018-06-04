@@ -48,7 +48,7 @@ class FileLogger implements LoggerInterface, ObserverInterface{
      * @param type $string
      */
     function writeLine($string) {
-        $this->fileOperation->write($string) . "\n";
+        $this->fileOperation->write($string . "\n");
     }
 
     /**

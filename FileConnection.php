@@ -70,7 +70,7 @@ class FileConnection implements Connection {
      * close the open file stream
      */
     public function closeConnection() {
-        if (is_null($this->fileStream)) {
+        if (!is_null($this->fileStream)) {
             return fclose($this->fileStream);
         }
     }
