@@ -15,25 +15,25 @@ class BRNeueingang {
 
     private $title;
     private $link;
+    private $creationDate;
     private $pubDate;
     private $author;
     private $drsNumber;
 
     /**
-     * 
-     * @param type $title
-     * @param type $link
-     * @param type $pubDate
-     * @param type $author
+     * Constructor
      */
-    function __construct($title, $link, $pubDate, $author) {
-        $this->title = $title;
-        $this->link = $link;
-        $this->pubDate = $pubDate;
-        $this->author = $author;
-        $this->drsNumber = $this->getDrsNumberFromTitle(
-            '/[0-9]{1,4}\/[0-9]{1,3}\(?[a-zA-Z]*\)?/'
-            , $this->getTitle());
+    private function _construct() {
+        // allocate your stuff
+    }
+
+    /**
+     * Static constructor(factory)
+     * @return \self
+     */
+    public static function create() {
+        $instance = new self();
+        return $instance;
     }
 
     /**
@@ -42,6 +42,14 @@ class BRNeueingang {
      */
     public function getTitle() {
         return $this->title;
+    }
+
+    /**
+     * 
+     * @return type
+     */
+    public function getCreationDate() {
+        return $this->creationDate;
     }
 
     /**
@@ -70,38 +78,6 @@ class BRNeueingang {
 
     /**
      * 
-     * @param type $title
-     */
-    public function setTitle($title) {
-        $this->title = $title;
-    }
-
-    /**
-     * 
-     * @param type $link
-     */
-    public function setLink($link) {
-        $this->link = $link;
-    }
-
-    /**
-     * 
-     * @param type $pubDate
-     */
-    public function setPubDate($pubDate) {
-        $this->pubDate = $pubDate;
-    }
-
-    /**
-     * 
-     * @param type $author
-     */
-    public function setAuthor($author) {
-        $this->author = $author;
-    }
-
-    /**
-     * 
      * @return type
      */
     public function getDrsNumber() {
@@ -110,19 +86,111 @@ class BRNeueingang {
 
     /**
      * 
-     * @param type $drsNumber
+     * @param type $title
      */
-    public function setDrsNumber($drsNumber) {
-        $this->drsNumber = $drsNumber;
+    public function setTitle($title) {
+
+        $this->title = trim($title);
+        return $this;
     }
 
     /**
      * 
-     * @param type $pattern
-     * @param type $subject
-     * @return type
+     * @param type $link
      */
-    private function getDrsNumberFromTitle($pattern, $subject) {
+    public function setLink($link) {
+        $this->link = trim($link);
+        return $this;
+    }
+
+    /**
+     * 
+     * @param type $creationDate
+     */
+    public function setCreationDate($creationDate) {
+        $this->creationDate = $creationDate;
+        return $this;
+    }
+
+    /**
+     * 
+     * @param type $creationDate
+     */
+    public function setCreationDateToTimeStamp($creationDate) {
+        $this->creationDate = strtotime($creationDate);
+        return $this;
+    }
+
+    /**
+     * 
+     * @param DateTime $creationDate
+     * @return $this
+     */
+    public function setCreationDateToDateTime($creationDate) {
+        $this->creationDate = DateTime::createFromFormat('Y-m-d H:i:s'
+                , $creationDate
+        );
+        return $this;
+    }
+
+    /**
+     * 
+     * @param type $pubDate
+     */
+    public function setPubDate($pubDate) {
+        $this->pubDate = $pubDate;
+        return $this;
+    }
+
+    /**
+     * 
+     * @param type $author
+     */
+    public function setAuthor($author) {
+        $this->author = $author;
+        return $this;
+    }
+
+    /**
+     * 
+     * @param type $drsNumber
+     */
+    public function setDrsNumber($drsNumber) {
+        $this->drsNumber = $drsNumber;
+        return $this;
+    }
+
+    /**
+     * 
+     * @return $this
+     */
+    public function setDrsNumberFromTitle() {
+        if (!is_null($this->getTitle())) {
+            return $this->setDrsNumber($this->getStringFromSubject('/[0-9]{1,4}\/[0-9]{1,3}\(?[a-zA-Z]*\)?/'
+                        , $this->getTitle()
+            ));
+        }
+    }
+
+    /**
+     * 
+     * @return $this
+     */
+    public function setPubDateFromTitle() {
+        if (!is_null($this->getTitle())) {
+            return $this->setPubDate(str_replace('|', '', $this->getStringFromSubject(
+                            '/\| [0-9]{1,2}\. [a-zA-ZäÄöÖüÜß]* [0-9]{4}/'
+                            , $this->getTitle())));
+        }
+    }
+
+    /**
+     * 
+     * @param String $pattern
+     * @param String $subject
+     * @return String $match[0]
+     */
+    private function getStringFromSubject($pattern, $subject) {
         preg_match($pattern, $subject, $match);
         return $match[0];
     }
@@ -133,6 +201,7 @@ class BRNeueingang {
     public function toString() {
         echo 'Titel: ' . ' ' . $this->getTitle() . "\n";
         echo 'Link: ' . ' ' . $this->getLink() . "\n";
+        echo 'CreationDate: ' . ' ' . $this->getCreationDate() . "\n";
         echo 'PubDate: ' . ' ' . $this->getPubDate() . "\n";
         echo 'Author: ' . ' ' . $this->getAuthor() . "\n";
         echo 'DRS: ' . ' ' . $this->getDrsNumber() . "\n";
