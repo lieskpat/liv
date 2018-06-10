@@ -12,13 +12,35 @@
  * @author Lieske
  */
 class BRNeueingang {
+    /*
+     * 
+     */
 
     private $title;
+    /*
+     * 
+     */
     private $link;
+    /*
+     * 
+     */
     private $creationDate;
+    /*
+     * 
+     */
     private $pubDate;
+    /*
+     * 
+     */
     private $author;
+    /*
+     * 
+     */
     private $drsNumber;
+    /*
+     * 
+     */
+    private $hashValue;
 
     /**
      * Constructor
@@ -86,6 +108,14 @@ class BRNeueingang {
 
     /**
      * 
+     * @return type
+     */
+    public function getHashValue() {
+        return $this->hashValue;
+    }
+
+    /**
+     * 
      * @param type $title
      */
     public function setTitle($title) {
@@ -128,7 +158,7 @@ class BRNeueingang {
      */
     public function setCreationDateToDateTime($creationDate) {
         $this->creationDate = DateTime::createFromFormat('Y-m-d H:i:s'
-                , $creationDate
+                        , $creationDate
         );
         return $this;
     }
@@ -167,7 +197,7 @@ class BRNeueingang {
     public function setDrsNumberFromTitle() {
         if (!is_null($this->getTitle())) {
             return $this->setDrsNumber($this->getStringFromSubject('/[0-9]{1,4}\/[0-9]{1,3}\(?[a-zA-Z]*\)?/'
-                        , $this->getTitle()
+                                    , $this->getTitle()
             ));
         }
     }
@@ -179,9 +209,19 @@ class BRNeueingang {
     public function setPubDateFromTitle() {
         if (!is_null($this->getTitle())) {
             return $this->setPubDate(str_replace('|', '', $this->getStringFromSubject(
-                            '/\| [0-9]{1,2}\. [a-zA-ZäÄöÖüÜß]* [0-9]{4}/'
-                            , $this->getTitle())));
+                                            '/\| [0-9]{1,2}\. [a-zA-ZäÄöÖüÜß]* [0-9]{4}/'
+                                            , $this->getTitle())));
         }
+    }
+
+    /**
+     * set a hashValue from drsNumber and pubDate
+     * @return $this
+     */
+    public function setHashValue() {
+        $array = array($this->getDrsNumber(), $this->getPubDate());
+        $this->hashValue = $this->hash($array);
+        return $this;
     }
 
     /**
@@ -197,6 +237,15 @@ class BRNeueingang {
 
     /**
      * 
+     * @param array $stringArrayToHash with strings to implode
+     * @return string
+     */
+    private function setHashString($stringArrayToHash) {
+        return implode("", $stringArrayToHash);
+    }
+
+    /**
+     * 
      */
     public function toString() {
         echo 'Titel: ' . ' ' . $this->getTitle() . "\n";
@@ -205,6 +254,44 @@ class BRNeueingang {
         echo 'PubDate: ' . ' ' . $this->getPubDate() . "\n";
         echo 'Author: ' . ' ' . $this->getAuthor() . "\n";
         echo 'DRS: ' . ' ' . $this->getDrsNumber() . "\n";
+    }
+
+    /**
+     * 
+     * @param BRNeueingang $object to compare two objects
+     * @return boolean
+     */
+    public function equals($object) {
+        if (is_null($object)) {
+            return FALSE;
+        }
+        if ($object == $this) {
+            return TRUE;
+        }
+        if ($object instanceof BRNeueingang) {
+            if ($this->getHashValue() == $object->getHashValue()) {
+                if ($this->title == $object->getTitle() &&
+                        $this->link == $object->getLink() &&
+                        $this->drsNumber == $object->getDrsNumber) {
+                    return TRUE;
+                } else {
+                    return FALSE;
+                }
+            } else {
+                return FALSE;
+            }
+        } else {
+            return FALSE;
+        }
+    }
+
+    /**
+     * 
+     * @param array $stringArrayToHash
+     * @return hash
+     */
+    public function hash($stringArrayToHash) {
+        return hash('md5', $this->setHashString($stringArrayToHash));
     }
 
 }
